@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: da_DK -->
+
+<resources>
+    <string name="swipe_to_browse">Stryg for at gennemse</string>
+    <string name="out_of_memory">Hvis du vil bruge Oculus 360 Photos, skal du frigøre mindst %1$s KB lagerplads på din telefon.</string>
+</resources>

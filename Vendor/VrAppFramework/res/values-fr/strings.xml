@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: fr_FR -->
+
+<resources>
+    <string name="swipe_to_browse">Balayez pour parcourir</string>
+    <string name="out_of_memory">Pour utiliser Oculus 360 Photos, veuillez libérer au moins %1$s Ko d’espace disque sur votre téléphone.</string>
+</resources>

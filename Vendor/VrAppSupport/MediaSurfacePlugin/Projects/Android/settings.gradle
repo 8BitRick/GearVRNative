@@ -1,0 +1,4 @@
+rootProject.projectDir = new File(settingsDir, '../../../../')
+rootProject.name = "MediaSurfacePlugin"
+
+include ':', ':Vendor:VrAppSupport:MediaSurfacePlugin:Projects:Android'

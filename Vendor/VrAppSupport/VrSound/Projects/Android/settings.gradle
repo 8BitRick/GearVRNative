@@ -1,0 +1,4 @@
+rootProject.projectDir = new File(settingsDir, '../../../..')
+rootProject.name = "VrSound"
+
+include ':', ':Vendor:VrAppSupport:VrSound:Projects:Android'

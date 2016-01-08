@@ -1,0 +1,6 @@
+rootProject.projectDir = new File(settingsDir, '.')
+rootProject.name = "GearVRRoot"
+
+include ':', 'Vendor:VrApi:Projects:AndroidPrebuilt', 'Vendor:VrAppSupport:VrLocale:Projects:AndroidPrebuilt', 'Vendor:VrAppSupport:VrSound:Projects:AndroidPrebuilt', 'Vendor:VrAppSupport:SystemUtils:Projects:AndroidPrebuilt', 'Vendor:VrAppSupport:VrGUI:Projects:AndroidPrebuilt'
+
+include 'GearVRNative:Projects:Android'

@@ -1,0 +1,1 @@
+rootProject.projectDir = new File(settingsDir, '../../../..')

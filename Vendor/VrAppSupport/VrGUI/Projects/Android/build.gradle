@@ -1,0 +1,51 @@
+apply plugin: 'com.android.library'
+
+archivesBaseName=rootProject.name
+
+dependencies {
+  compile name: 'VrAppFramework', ext: 'aar'
+}
+
+android {
+  compileSdkVersion 19
+  buildToolsVersion '22.0.1'
+
+  sourceSets {
+    main {
+      manifest.srcFile 'AndroidManifest.xml'
+      java.srcDirs = ['src']
+      res.srcDirs = ['../../res']
+      // Native libs will be picked up by the build scripts.  They are not
+      // included in the aar because the format does not allow for header
+      // files or other ways to link native code against any binaries
+      // within.
+    }
+  }
+}
+
+project.afterEvaluate {
+  compileDebugNdk.dependsOn   'NDKBuildDebug'
+  compileReleaseNdk.dependsOn 'NDKBuildRelease'
+  clean.dependsOn             'NDKBuildClean'
+}
+
+android.libraryVariants.all { variant ->
+  variant.outputs.each { output ->
+    def outputFile = output.outputFile
+    if ( outputFile != null && outputFile.name.endsWith('.aar')) {
+		//def buildTypeName = variant.buildType.name
+        //def fileName = rootProject.name + "-" + buildTypeName + ".aar"
+		def fileName = rootProject.name + ".aar"
+	    output.outputFile = 
+			     new File(outputFile.parent, fileName)
+    }
+    
+    // Add a task for generating a jar file to support the legacy
+    // Unity integration and Eclipse.
+    def task = project.tasks.create "jar${variant.name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
+    
+  }
+}

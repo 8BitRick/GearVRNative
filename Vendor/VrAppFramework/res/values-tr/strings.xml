@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: tr_TR -->
+
+<resources>
+    <string name="swipe_to_browse">Göz Atmak İçin Parmağını Kaydır</string>
+    <string name="out_of_memory">Oculus 360 Photos\'u kullanmak için lütfen telefonunda en az %1$sKB boş depolama alanı aç.</string>
+</resources>

@@ -1,0 +1,5 @@
+
+// Native only build setup
+task assembleDebug(dependsOn: NDKBuildDebug) << {}
+task assembleRelease(dependsOn: NDKBuildRelease) << {}
+task clean(dependsOn: NDKBuildClean) << {}

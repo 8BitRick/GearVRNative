@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: ru_RU -->
+
+<resources>
+    <string name="swipe_to_browse">Проведите пальцем в направлении стрелки, чтобы просмотреть</string>
+    <string name="out_of_memory">Для пользования Oculus 360 Photos пожалуйста освободите минимум %1$sКБ на вашем телефоне.</string>
+</resources>

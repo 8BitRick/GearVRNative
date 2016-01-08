@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- See fburl.com/140690840 for information about i18n on Android -->
+<!-- @generated -->
+<!-- FB Locale: zh_HK -->
+
+<resources>
+    <string name="swipe_to_browse">滑動即可瀏覽</string>
+    <string name="out_of_memory">若要使用 Oculus 360 Photos，請將手機騰出至少 %1$sKB 的裝置儲存空間。</string>
+</resources>

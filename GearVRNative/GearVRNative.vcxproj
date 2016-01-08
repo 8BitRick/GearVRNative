@@ -1,0 +1,364 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x86">
+      <Configuration>Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x86">
+      <Configuration>Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Vendor\1stParty\OpenGL_Loader\Include\GLES2\gl2ext_loader.h" />
+    <ClInclude Include="..\Vendor\1stParty\OpenGL_Loader\Include\GLES2\gl2_loader.h" />
+    <ClInclude Include="..\Vendor\1stParty\OpenGL_Loader\Include\GLES3\gl3_loader.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Android\JniUtils.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Alg.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Allocator.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Array.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Atomic.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_BinaryFile.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_BitFlags.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Color.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Compiler.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_ContainerAllocator.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Deque.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_File.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Geometry.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_GlUtils.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Hash.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_JSON.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_KeyCodes.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Lexer.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_List.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Lockless.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Log.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_LogUtils.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_MappedFile.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Math.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_MemBuffer.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_RefCount.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Std.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_String.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_StringHash.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_String_Utils.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_SysFile.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_System.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_ThreadCommandQueue.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Threads.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Types.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_TypesafeNumber.h" />
+    <ClInclude Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_UTF8Util.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi_Config.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi_Helpers.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi_LocalPrefs.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi_Types.h" />
+    <ClInclude Include="..\Vendor\VrApi\Include\VrApi_Version.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\App.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\AppLocal.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\BitmapFont.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\Console.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\DebugLines.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\EyeBuffers.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\EyePostRender.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\GlGeometry.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\GlProgram.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\GlSetup.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\GlTexture.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\ImageData.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\Input.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\KeyState.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\MessageQueue.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\OVR_FileSys.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\OVR_Stream.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\PackageFiles.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\PathUtils.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\PointTracker.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\SurfaceRender.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\SurfaceTexture.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\TalkToJava.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\VrCommon.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Include\VrFrameBuilder.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_de.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_en.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_es.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_fr.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_it.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_ja.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\embedded\dependency_error_ko.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\Framebuffer.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\OVR_Stream_Impl.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\OVR_Uri.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\TextTexture.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\UniversalMenu_Commands.h" />
+    <ClInclude Include="..\Vendor\VrAppFramework\Src\UserProfile.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\GlStateSave.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\MediaSurface.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\SurfaceTexture.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\SystemUtils\Include\SystemActivities.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\ActionComponents.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\AnimComponents.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\CollisionPrimitive.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\DefaultComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\Fader.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\FolderBrowser.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\GazeCursor.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\GazeCursorLocal.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\GuiSys.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\Lerp.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\MetaDataManager.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\ProgressBarComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\ScrollBarComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\ScrollManager.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\SliderComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\SoundLimiter.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\SwipeHintComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\TextFade_Component.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIButton.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIContainer.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIDiscreteSlider.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIImage.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UILabel.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIMenu.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UINotification.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIObject.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIProgressBar.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIRect.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UISlider.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UITexture.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\ui_default.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VolumePopup.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenu.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuComponent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuEvent.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuEventHandler.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuMgr.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuObject.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrLocale\Src\OVR_Locale.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrLocale\Src\tinyxml2.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrModel\Src\ModelCollision.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrModel\Src\ModelFile.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrModel\Src\ModelRender.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrModel\Src\ModelTrace.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrModel\Src\SceneView.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrSound\Include\SoundAssetMapping.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrSound\Include\SoundEffectContext.h" />
+    <ClInclude Include="..\Vendor\VrAppSupport\VrSound\Include\SoundPool.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_Config.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_GLES3.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_LegacyPackets.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_Packets.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_StreamProcessor.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Include\OVR_Capture_Types.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_AsyncStream.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_FileIO.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_Local.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_Socket.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_StandardSensors.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_Thread.h" />
+    <ClInclude Include="..\Vendor\VrCapture\Src\OVR_Capture_Variable.h" />
+    <ClInclude Include="Include\GVRAudioMgr.h" />
+    <ClInclude Include="Include\fmod\fmod.h" />
+    <ClInclude Include="Include\fmod\fmod.hpp" />
+    <ClInclude Include="Include\fmod\fmod_codec.h" />
+    <ClInclude Include="Include\fmod\fmod_common.h" />
+    <ClInclude Include="Include\fmod\fmod_dsp.h" />
+    <ClInclude Include="Include\fmod\fmod_dsp_effects.h" />
+    <ClInclude Include="Include\fmod\fmod_errors.h" />
+    <ClInclude Include="Include\fmod\fmod_output.h" />
+    <ClInclude Include="Include\VrCubeWorld.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Vendor\1stParty\OpenGL_Loader\Src\gles2ext_loader.cpp" />
+    <ClCompile Include="..\Vendor\1stParty\OpenGL_Loader\Src\gles2_loader.cpp" />
+    <ClCompile Include="..\Vendor\1stParty\OpenGL_Loader\Src\gles3_loader.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Android\JniUtils.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Alg.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Allocator.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Atomic.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_BinaryFile.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_File.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_FileFILE.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Geometry.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_GlUtils.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_JSON.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Lexer.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Lockless.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Log.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_LogUtils.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_MappedFile.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Math.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_MemBuffer.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_RefCount.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_Std.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_String.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_String_FormatUtil.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_String_PathUtil.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_SysFile.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_System.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_ThreadCommandQueue.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_ThreadsPthread.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_ThreadsWinAPI.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_TypesafeNumber.cpp" />
+    <ClCompile Include="..\Vendor\LibOVRKernel\Src\Kernel\OVR_UTF8Util.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\App.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\AppRender.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\App_Android.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\App_Windows.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\BitmapFont.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\Console.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\DebugLines.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\EyeBuffers.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\EyePostRender.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\Framebuffer.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlGeometry.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlProgram.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlSetup.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlSetup_Android.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlSetup_Windows.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlTexture.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlTexture_Android.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\GlTexture_Windows.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\ImageData.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\Input.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\KeyState.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\MessageQueue.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\OVR_FileSys.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\OVR_Stream.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\OVR_Uri.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\PackageFiles.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\PathUtils.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\SurfaceRender.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\SurfaceTexture.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\TalkToJava.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\TextTexture.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\UserProfile.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\VrCommon.cpp" />
+    <ClCompile Include="..\Vendor\VrAppFramework\Src\VrFrameBuilder.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\MediaSurface.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\MediaSurfacePlugin.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\MediaSurfacePlugin\Src\SurfaceTexture.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\ActionComponents.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\AnimComponents.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\CollisionPrimitive.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\DefaultComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\Fader.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\FolderBrowser.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\GazeCursor.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\GuiSys.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\MetaDataManager.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\ProgressBarComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\ScrollBarComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\ScrollManager.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\SliderComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\SoundLimiter.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\SwipeHintComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\TextFade_Component.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIButton.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIContainer.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIDiscreteSlider.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIImage.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UILabel.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIMenu.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UINotification.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIObject.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UIProgressBar.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UISlider.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\UI\UITexture.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VolumePopup.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenu.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuComponent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuEvent.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuEventHandler.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuMgr.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrGUI\Src\VRMenuObject.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrLocale\Src\OVR_Locale.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrLocale\Src\tinyxml2.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrModel\Src\ModelCollision.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrModel\Src\ModelFile.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrModel\Src\ModelRender.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrModel\Src\ModelTrace.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrModel\Src\SceneView.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrSound\Src\SoundAssetMapping.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrSound\Src\SoundEffectContext.cpp" />
+    <ClCompile Include="..\Vendor\VrAppSupport\VrSound\Src\SoundPool.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_AsyncStream.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_FileIO.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_GLES3.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_Socket.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_StandardSensors.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_Thread.cpp" />
+    <ClCompile Include="..\Vendor\VrCapture\Src\OVR_Capture_Variable.cpp" />
+    <ClCompile Include="Src\GVRAudioMgr.cpp" />
+    <ClCompile Include="Src\GearVRNative.cpp" />
+    <ClCompile Include="Src\VrCubeWorld.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\basic.frag" />
+    <None Include="assets\shaders\basic.vert" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{85928efc-43c7-4549-89e0-7a0a377852ff}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>1.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_6</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Clang_3_6</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_6</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>Makefile</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Clang_3_6</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <NMakeIncludeSearchPath>$(ProjectDir)Include;$(ProjectDir)Include\fmod;$(ProjectDir)..\Vendor\VrAppFramework\Include;$(ProjectDir)..\Vendor\VrAppSupport\MediaSurfacePlugin\Src;$(ProjectDir)..\Vendor\VrAppSupport\SystemUtils\Include;$(ProjectDir)..\Vendor\VrAppSupport\VrGUI\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrLocale\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrModel\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrSound\Include;;$(ProjectDir)..\Vendor\3rdParty\minizip\src;$(ProjectDir)..\Vendor\VrCapture\Include;$(ProjectDir)..\Vendor\LibOVRKernel\Src;$(ProjectDir)..\Vendor\VrApi\Include;$(ProjectDir)..\Vendor\1stParty\OpenGL_Loader\Include;$(ProjectDir)..\Vendor\VrCapture\Include;$(ProjectDir)..\Vendor\LibOVRKernel\Src;$(ProjectDir)..\Vendor\VrApi\Include;$(ProjectDir)..\Vendor\1stParty\OpenGL_Loader\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>GLES3/gl3.h</NMakeForcedIncludes>
+    <NMakePreprocessorDefinitions>OVR_OS_ANDROID;ANDROID</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <NMakeIncludeSearchPath>$(ProjectDir)Include;$(ProjectDir)Include\fmod;$(ProjectDir)..\Vendor\VrAppFramework\Include;$(ProjectDir)..\Vendor\VrAppSupport\MediaSurfacePlugin\Src;$(ProjectDir)..\Vendor\VrAppSupport\SystemUtils\Include;$(ProjectDir)..\Vendor\VrAppSupport\VrGUI\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrLocale\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrModel\Src;$(ProjectDir)..\Vendor\VrAppSupport\VrSound\Include;;$(ProjectDir)..\Vendor\3rdParty\minizip\src;$(ProjectDir)..\Vendor\VrCapture\Include;$(ProjectDir)..\Vendor\LibOVRKernel\Src;$(ProjectDir)..\Vendor\VrApi\Include;$(ProjectDir)..\Vendor\1stParty\OpenGL_Loader\Include;$(ProjectDir)..\Vendor\VrCapture\Include;$(ProjectDir)..\Vendor\LibOVRKernel\Src;$(ProjectDir)..\Vendor\VrApi\Include;$(ProjectDir)..\Vendor\1stParty\OpenGL_Loader\Include;$(NMakeIncludeSearchPath)</NMakeIncludeSearchPath>
+    <NMakeForcedIncludes>GLES3/gl3.h</NMakeForcedIncludes>
+    <NMakePreprocessorDefinitions>OVR_OS_ANDROID;ANDROID</NMakePreprocessorDefinitions>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>
