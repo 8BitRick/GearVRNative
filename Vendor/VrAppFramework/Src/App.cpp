@@ -249,7 +249,7 @@ AppLocal::AppLocal( JNIEnv & jni_, jobject activityObject_, VrAppInterface & int
 			SuggestedEyeFovDegreesY( 90.0f ),
 			InputEvents(),
 			TheVrFrame(),
-			VrThread( &ThreadStarter, this ),
+			VrThread( &ThreadStarter, this, 256 * 1024 ),
 			ShowFPS( false ),
 			WasMounted( false ),	
 			enableDebugOptions( false ),			

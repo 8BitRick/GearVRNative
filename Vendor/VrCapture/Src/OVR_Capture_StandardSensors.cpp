@@ -15,6 +15,9 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 #include "OVR_Capture_FileIO.h"
 
 #include <algorithm>
+#include <string>
+#include <sstream>
+#include <iterator>
 
 namespace OVR
 {
@@ -96,11 +99,23 @@ namespace Capture
 			}
 			if(gpuFreqFile == NullFileHandle) // Mali
 			{
-				gpuFreqFile = OpenFile("/sys/devices/14ac0000.mali/clock");
+				gpuFreqFile = OpenFile("/sys/class/misc/mali0/device/clock");
 				if(gpuFreqFile != NullFileHandle)
 				{
-					// TODO: query max GPU clocks on Mali, for now hacked to what we know the S6 is
-					SensorSetRange(g_gpuLabel, 0, 0, Sensor_Interp_Nearest, Sensor_Unit_MHz);
+					std::string buf(256, '\0');
+					ReadFileLine("/sys/class/misc/mali0/device/dvfs_table", &buf[0], (int)buf.size());
+
+					// dvfs_table contains a space delimited list of all possible clock rates... so pick the greatest...
+					int maxFreq = 0;
+					std::stringstream bufstream(buf);
+					std::istream_iterator<int> begin(bufstream);
+					std::istream_iterator<int> end;
+					for(std::istream_iterator<int> s=begin; s!=end; s++)
+					{
+						maxFreq = std::max(maxFreq, *s);
+					}
+
+					SensorSetRange(g_gpuLabel, 0, (float)maxFreq, Sensor_Interp_Nearest, Sensor_Unit_MHz);
 				}
 			}
 		}

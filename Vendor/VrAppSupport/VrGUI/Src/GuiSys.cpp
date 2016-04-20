@@ -649,7 +649,7 @@ void OvrGuiSysLocal::RenderEyeView( Matrix4f const & centerViewMatrix, Matrix4f 
 
 	if ( !SkipSubmit )
 	{
-		GL_CheckErrors( "Pre GUI" );
+		// GL_CheckErrors( "Pre GUI" );
 		OVR::Array< ovrDrawSurface > surfaceList;
 		MenuMgr->RenderEyeView( centerViewMatrix, viewMatrix, projectionMatrix, surfaceList );
 		RenderSurfaceList( surfaceList, viewMatrix, projectionMatrix );

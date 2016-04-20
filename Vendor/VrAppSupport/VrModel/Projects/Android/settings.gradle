@@ -1,4 +1,4 @@
 rootProject.projectDir = new File(settingsDir, '../../../../')
 rootProject.name = "VrModel"
 
-include ':', ':Vendor:VrAppSupport:VrModel:Projects:Android'
+include ':', ':VrAppSupport:VrModel:Projects:Android'

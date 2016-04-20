@@ -31,8 +31,8 @@ LOCAL_SRC_FILES  := ../../../Src/OVR_Capture.cpp \
                     ../../../Src/OVR_Capture_GLES3.cpp \
                     ../../../Src/OVR_Capture_Socket.cpp \
                     ../../../Src/OVR_Capture_StandardSensors.cpp \
-                    ../../../Src/OVR_Capture_Thread.cpp \
-                    ../../../Src/OVR_Capture_Variable.cpp 
+                    ../../../Src/OVR_Capture_StreamProcessor.cpp \
+                    ../../../Src/OVR_Capture_Thread.cpp
 
 # Enable use of OpenGL Loader vs implicit linking to GLES3
 LOCAL_STATIC_LIBRARIES += openglloader

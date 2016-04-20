@@ -1,4 +1,4 @@
 rootProject.projectDir = new File(settingsDir, '../../../')
 rootProject.name = "VrCapture"
 
-include ':', ':Vendor:VrCapture:Projects:Android'
+include ':', ':VrCapture:Projects:Android'

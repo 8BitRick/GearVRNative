@@ -18,7 +18,9 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 
 #if defined(OVR_CAPTURE_USE_POSIX_FILES)
 	#include <unistd.h>
+	#pragma GCC diagnostic ignored "-Wconversion"
 	#include <sys/stat.h>
+	#pragma GCC diagnostic warning "-Wconversion"
 #endif
 
 #if defined(OVR_CAPTURE_WINDOWS)
@@ -46,11 +48,11 @@ namespace Capture
 	}
 	int ReadFile(FileHandle file, void *buf, int bufsize)
 	{
-		return (int)pread(file, buf, bufsize, 0);
+		return static_cast<int>(pread(file, buf, static_cast<size_t>(bufsize), 0));
 	}
 	int WriteFile(FileHandle file, const void *buf, int bufsize)
 	{
-		return (int)write(file, buf, bufsize);
+		return static_cast<int>(write(file, buf, static_cast<size_t>(bufsize)));
 	}
 #else
 	FileHandle OpenFile(const char *path, bool writable)

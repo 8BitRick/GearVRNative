@@ -21,7 +21,7 @@ To include ndk-build module:
 	LOCAL_STATIC_LIBRARIES += openglloader
 
 	# insert this at the bottom of your Android.mk
-	$(call import-module,1stParty/OpenGL_Loader/Projects/Android/jni)
+	$(call import-module,Vendor/1stParty/OpenGL_Loader/Projects/Android/jni)
 
 To include GLES2 in your code:
 	#include <GLES2/gl2_loader.h>
