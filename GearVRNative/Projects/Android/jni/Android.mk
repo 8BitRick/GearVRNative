@@ -20,9 +20,9 @@ include ../../../cflags.mk
 LOCAL_MODULE			:= gearvrnative
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/../../../Include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/../../../Include/fmod
-LOCAL_SRC_FILES			:= ../../../Src/GearVRNative.cpp
-LOCAL_SRC_FILES			+= ../../../Src/VrCubeWorld.cpp
-LOCAL_SRC_FILES			+= ../../../Src/GVRAudioMgr.cpp
+LOCAL_SRC_FILES			:= GearVRNative.cpp
+LOCAL_SRC_FILES			+= VrCubeWorld.cpp
+LOCAL_SRC_FILES			+= GVRAudioMgr.cpp
 LOCAL_STATIC_LIBRARIES	+= systemutils vrsound vrlocale vrgui vrappframework libovrkernel
 LOCAL_SHARED_LIBRARIES	+= vrapi fmodL
 

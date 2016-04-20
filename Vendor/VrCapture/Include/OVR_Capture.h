@@ -101,7 +101,10 @@ namespace Capture
 	// Set the absolute value of a sensor, may be called at any frequency.
 	void SensorSetValue(const LabelIdentifier label, float value);
 
-	float GetVariable(const LabelIdentifier label, float valDefault, float valMin, float valMax);
+	// Get a user controllable variable... removely tweaked in real-time via OVRMonitor.
+	float GetVariable(const LabelIdentifier label, float defaultValue, float minValue, float maxValue);
+	int   GetVariable(const LabelIdentifier label, int   defaultValue, int   minValue, int   maxValue);
+	bool  GetVariable(const LabelIdentifier label, bool  defaultValue);
 
 	class CPUScope
 	{

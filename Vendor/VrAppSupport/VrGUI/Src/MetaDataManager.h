@@ -109,7 +109,7 @@ public:
 	void								PrintCategories() const;
     void								RegenerateCategoryIndices();
 
-protected:
+// protected:
 	// Overload to fill extended data during initialization
 	virtual OvrMetaDatum *	CreateMetaDatum( const char* fileName ) const = 0;
 	virtual	void			ExtractExtendedData( const JsonReader & jsonDatum, OvrMetaDatum & outDatum ) const = 0;
@@ -142,7 +142,6 @@ protected:
 	void					ExtractMetaData( JSON * dataFile, const Array< String > & searchPaths, StringHash< OvrMetaDatum * > & outMetaData ) const;
 	void					ExtractRemoteMetaData( JSON * dataFile, StringHash< OvrMetaDatum * > & outMetaData ) const;
 	void					Serialize();
-
 private:
 	String 					FilePath;
 	Array< Category >		Categories;

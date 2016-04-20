@@ -29,7 +29,7 @@ namespace Capture
 
 	// Captures the frame buffer from a Texture Object from an OpenGL ES 3.0 Context.
 	// Must be called from a thread with a valid GLES3 context!
-	void FrameBufferGLES3(unsigned int textureID);
+	void FrameBufferGLES3(unsigned int textureID, Rect<float> textureRect);
 
 	void EnterGPUZoneGLES3(const LabelIdentifier label);
 	void LeaveGPUZoneGLES3(void);

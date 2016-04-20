@@ -166,6 +166,25 @@ namespace Capture
 			const char    *m_name;
 	};
 
+	template<typename T>
+	struct Rect
+	{
+		T x;
+		T y;
+		T width;
+		T height;
+
+		inline bool operator==(const Rect<T> &other) const
+		{
+			return x==other.x && y==other.y && width==other.width && height==other.height;
+		}
+
+		inline bool operator!=(const Rect<T> &other) const
+		{
+			return x!=other.x || y!=other.y || width!=other.width || height!=other.height;
+		}
+	};
+
 } // namespace Capture
 } // namespace OVR
 

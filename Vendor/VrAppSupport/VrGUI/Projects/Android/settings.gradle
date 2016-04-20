@@ -1,4 +1,4 @@
 rootProject.projectDir = new File(settingsDir, '../../../..')
 rootProject.name = "VrGUI"
 
-include ':', ':Vendor:VrAppSupport:VrGUI:Projects:Android'
+include ':', ':VrAppSupport:VrGUI:Projects:Android'

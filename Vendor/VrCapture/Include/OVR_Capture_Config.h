@@ -13,6 +13,8 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 #ifndef OVR_CAPTURE_CONFIG_H
 #define OVR_CAPTURE_CONFIG_H
 
+#include <stdlib.h>
+
 #if defined(_WIN32) || defined(_WIN64)
 	#define OVR_CAPTURE_WINDOWS
 #elif defined(__APPLE__)
@@ -39,6 +41,12 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 
 #if defined(__cplusplus) && __cplusplus >= 201103L
 	#define OVR_CAPTURE_CXX_11
+#endif
+
+#if defined(OVR_CAPTURE_CXX_11)
+	#define OVR_CAPTURE_OVERRIDE override
+#else
+	#define OVR_CAPTURE_OVERRIDE
 #endif
 
 // We use zlib for crc32() to generate Label name hashes

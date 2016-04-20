@@ -81,6 +81,7 @@ namespace Capture
 	static GLuint                  g_vertexShader   = 0;
 	static GLuint                  g_fragmentShader = 0;
 	static GLuint                  g_program        = 0;
+	static GLint                   g_textureRectLoc = -1;
 
 	static GLuint                  g_vertexBuffer      = 0;
 	static GLuint                  g_vertexArrayObject = 0;
@@ -91,135 +92,406 @@ namespace Capture
 		TEXCOORD_ATTRIBUTE,
 	};
 
-	static const char *g_vertexShaderSource = 
-		"attribute vec4 Position;\n"
-		"attribute vec2 TexCoord;\n"
-		"varying  highp vec2 oTexCoord;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = Position;\n"
-		"   oTexCoord = vec2(TexCoord.x, 1.0 - TexCoord.y);\n"    // need to flip Y
-		"}\n";
+	static const char *g_vertexShaderSource = R"=====(
+		attribute vec4 Position;
+		attribute vec2 TexCoord;
+		varying  highp vec2 oTexCoord;
+		uniform   vec4 TextureRect;
+		void main()
+		{
+			gl_Position = Position;
+			vec2 uv = TexCoord.xy*TextureRect.zw + TextureRect.xy;
+			oTexCoord = vec2(uv.x, 1.0 - uv.y);    // need to flip Y
+		}
+		)=====";
 
-	static const char *g_fragmentShaderSource =
-		"uniform sampler2D Texture0;\n"
-		"varying highp vec2 oTexCoord;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_FragColor = texture2D(Texture0, oTexCoord);\n"
-		"}\n";
+	static const char *g_fragmentShaderSource = R"=====(
+		uniform sampler2D Texture0;
+		varying highp vec2 oTexCoord;
+		void main()
+		{
+			gl_FragColor = texture2D(Texture0, oTexCoord);
+		}
+		)=====";
 
-	static const char *g_vertexShaderSourceDXT1 = 
-		"#version 300 es\n"
-		"in        vec4 Position;\n"
-		"in        vec2 TexCoord;\n"
-		"out highp vec2 oTexCoord;\n"
-		"void main()\n"
-		"{\n"
-		"   gl_Position = Position;\n"
-		"   oTexCoord = vec2(TexCoord.x, TexCoord.y);\n" // don't flip Y here, we do it after applying block offsets.
-		"}\n";
+	static const char *g_vertexShaderSourceDXT1 = R"=====(#version 300 es
+		uniform   vec2 UVBlockScale;
+		in        vec4 Position;
+		in        vec2 TexCoord;
+		out highp vec2 oTexCoord;
+		void main()
+		{
+			gl_Position = Position;
+			oTexCoord = TexCoord.xy * UVBlockScale.xy;  // don't flip Y here, we do it after applying block offsets. but clip to beginning of last block
+		}
+		)=====";
 
 	// Based on http://www.nvidia.com/object/real-time-ycocg-dxt-compression.html
-	static const char *g_fragmentShaderSourceDXT1 =
-		"#version 300 es\n"
-		"precision mediump float;\n"
-		"uniform       sampler2D Texture0;\n"
-		"uniform       vec2      TexelSize;\n"
-		"in            vec2      oTexCoord;\n"
-		"out   mediump uvec4     Output;\n"
+	static const char *g_fragmentShaderSourceDXT1 = R"=====(#version 300 es
+		precision mediump float;
+
+		uniform       sampler2D Texture0;
+		uniform       vec2      TexelSize;
+		uniform       vec4      TextureRect;
+		in            vec2      oTexCoord;
+		out   mediump uvec4     Output;
+
 		// Convert to 565 and expand back into color
-		"mediump uint Encode565(inout vec3 color)\n"
-		"{\n"
-		"   uvec3 c    = uvec3(round(color * vec3(31.0, 63.0, 31.0)));\n"
-		"   mediump uint  c565 = (c.r << 11) | (c.g << 5) | c.b;\n"
-		"   c.rb  = (c.rb << 3) | (c.rb >> 2);\n"
-		"   c.g   = (c.g << 2) | (c.g >> 4);\n"
-		"   color = vec3(c) * (1.0 / 255.0);\n"
-		"   return c565;\n"
-		"}\n"
-		"float ColorDistance(vec3 c0, vec3 c1)\n"
-		"{\n"
-		"   vec3 d = c0-c1;\n"
-		"   return dot(d, d);\n"
-		"}\n"
-		"void main()\n"
-		"{\n"
-		"   vec3 block[16];\n"
-		// Load block colors...
-		"   for(int i=0; i<4; i++)\n"
-		"   {\n"
-		"       for(int j=0; j<4; j++)\n"
-		"       {\n"
-		"           vec2 uv = (oTexCoord.xy + vec2(j,i)*TexelSize);\n"
-		"           uv   = uv - TexelSize*1.5;\n" // block center offset
-		"           uv.y = 1.0 - uv.y;\n" // flip Y
-		"           block[i*4+j] = texture(Texture0, uv).rgb;\n"
-		"       }\n"
-		"   }\n"
-		// Calculate bounding box...
-		"   vec3 minblock = block[0];\n"
-		"   vec3 maxblock = block[0];\n"
-		"   for(int i=1; i<16; i++)\n"
-		"   {\n"
-		"       minblock = min(minblock, block[i]);\n"
-		"       maxblock = max(maxblock, block[i]);\n"
-		"   }\n"
-		// Inset bounding box...
-		"   vec3 inset = (maxblock - minblock) / 16.0 - (8.0 / 255.0) / 16.0;\n"
-		"   minblock = clamp(minblock + inset, 0.0, 1.0);\n"
-		"   maxblock = clamp(maxblock - inset, 0.0, 1.0);\n"
-		// Convert to 565 colors...
-		"   mediump uint c0 = Encode565(maxblock);\n"
-		"   mediump uint c1 = Encode565(minblock);\n"
-		// Make sure c0 has the largest integer value...
-		"   if(c1>c0)\n"
-		"   {\n"
-		"       mediump uint uitmp=c0; c0=c1; c1=uitmp;\n"
-		"       vec3 v3tmp=maxblock; maxblock=minblock; minblock=v3tmp;\n"
-		"   }\n"
-		// Calculate indices...
-		"   vec3 color0 = maxblock;\n"
-		"   vec3 color1 = minblock;\n"
-		"   vec3 color2 = (color0 + color0 + color1) * (1.0/3.0);\n"
-		"   vec3 color3 = (color0 + color1 + color1) * (1.0/3.0);\n"
-		"   mediump uint i0 = 0U;\n"
-		"   mediump uint i1 = 0U;\n"
-		"   for(int i=0; i<8; i++)\n"
-		"   {\n"
-		"       vec3 color = block[i];\n"
-		"       vec4 dist;\n"
-		"       dist.x = ColorDistance(color, color0);\n"
-		"       dist.y = ColorDistance(color, color1);\n"
-		"       dist.z = ColorDistance(color, color2);\n"
-		"       dist.w = ColorDistance(color, color3);\n"
-		"       mediump uvec4 b = uvec4(greaterThan(dist.xyxy, dist.wzzw));\n"
-		"       uint b4 = dist.z > dist.w ? 1U : 0U;\n"
-		"       uint index = (b.x & b4) | (((b.y & b.z) | (b.x & b.w)) << 1);\n"
-		"       i0 |= index << (i*2);\n"
-		"   }\n"
-		"   for(int i=0; i<8; i++)\n"
-		"   {\n"
-		"       vec3 color = block[i+8];\n"
-		"       vec4 dist;\n"
-		"       dist.x = ColorDistance(color, color0);\n"
-		"       dist.y = ColorDistance(color, color1);\n"
-		"       dist.z = ColorDistance(color, color2);\n"
-		"       dist.w = ColorDistance(color, color3);\n"
-		"       mediump uvec4 b = uvec4(greaterThan(dist.xyxy, dist.wzzw));\n"
-		"       uint b4 = dist.z > dist.w ? 1U : 0U;\n"
-		"       uint index = (b.x & b4) | (((b.y & b.z) | (b.x & b.w)) << 1);\n"
-		"       i1 |= index << (i*2);\n"
-		"   }\n"
-		// Write out final dxt1 block...
-		"   Output = uvec4(c0, c1, i0, i1);\n"
-		"}\n";
+		mediump uint Encode565(inout vec3 color)
+		{
+			uvec3 c    = uvec3(round(color * vec3(31.0, 63.0, 31.0)));
+			mediump uint  c565 = (c.r << 11) | (c.g << 5) | c.b;
+			c.rb  = (c.rb << 3) | (c.rb >> 2);
+			c.g   = (c.g << 2) | (c.g >> 4);
+			color = vec3(c) * (1.0 / 255.0);
+			return c565;
+		}
+
+		float ColorDistance(vec3 c0, vec3 c1)
+		{
+			vec3 d = c0-c1;
+			return dot(d, d);
+		}
+
+		void main()
+		{
+			vec3 block[16];
+
+			// Load block colors...
+			for(int i=0; i<4; i++)
+			{
+				for(int j=0; j<4; j++)
+				{
+					vec2 uv = (oTexCoord.xy + vec2(j,i)*TexelSize);
+					uv = uv * TextureRect.zw + TextureRect.xy; // clip to TextureRect
+					uv.y = 1.0 - uv.y; // flip Y
+					block[i*4+j] = texture(Texture0, uv).rgb;
+				}
+			}
+
+			// Calculate bounding box...
+			vec3 minblock = block[0];
+			vec3 maxblock = block[0];
+			for(int i=1; i<16; i++)
+			{
+				minblock = min(minblock, block[i]);
+				maxblock = max(maxblock, block[i]);
+			}
+
+			// Inset bounding box...
+			vec3 inset = (maxblock - minblock) / 16.0 - (8.0 / 255.0) / 16.0;
+			minblock = clamp(minblock + inset, 0.0, 1.0);
+			maxblock = clamp(maxblock - inset, 0.0, 1.0);
+
+			// Convert to 565 colors...
+			mediump uint c0 = Encode565(maxblock);
+			mediump uint c1 = Encode565(minblock);
+
+			// Make sure c0 has the largest integer value...
+			if(c1>c0)
+			{
+				mediump uint uitmp=c0; c0=c1; c1=uitmp;
+				vec3 v3tmp=maxblock; maxblock=minblock; minblock=v3tmp;
+			}
+
+			// Calculate indices...
+			vec3 color0 = maxblock;
+			vec3 color1 = minblock;
+			vec3 color2 = (color0 + color0 + color1) * (1.0/3.0);
+			vec3 color3 = (color0 + color1 + color1) * (1.0/3.0);
+
+			mediump uint i0 = 0U;
+			mediump uint i1 = 0U;
+			for(int i=0; i<8; i++)
+			{
+				vec3 color = block[i];
+				vec4 dist;
+				dist.x = ColorDistance(color, color0);
+				dist.y = ColorDistance(color, color1);
+				dist.z = ColorDistance(color, color2);
+				dist.w = ColorDistance(color, color3);
+				mediump uvec4 b = uvec4(greaterThan(dist.xyxy, dist.wzzw));
+				uint b4 = dist.z > dist.w ? 1U : 0U;
+				uint index = (b.x & b4) | (((b.y & b.z) | (b.x & b.w)) << 1);
+				i0 |= index << (i*2);
+			}
+			for(int i=0; i<8; i++)
+			{
+				vec3 color = block[i+8];
+				vec4 dist;
+				dist.x = ColorDistance(color, color0);
+				dist.y = ColorDistance(color, color1);
+				dist.z = ColorDistance(color, color2);
+				dist.w = ColorDistance(color, color3);
+				mediump uvec4 b = uvec4(greaterThan(dist.xyxy, dist.wzzw));
+				uint b4 = dist.z > dist.w ? 1U : 0U;
+				uint index = (b.x & b4) | (((b.y & b.z) | (b.x & b.w)) << 1);
+				i1 |= index << (i*2);
+			}
+
+			// Write out final dxt1 block...
+			Output = uvec4(c0, c1, i0, i1);
+		}
+		)=====";
 	
 	static const float g_vertices[] =
 	{
 	   -1.0f,-1.0f, 0.0f, 1.0f,  0.0f, 0.0f,
 		3.0f,-1.0f, 0.0f, 1.0f,  2.0f, 0.0f,
 	   -1.0f, 3.0f, 0.0f, 1.0f,  0.0f, 2.0f,
+	};
+
+	class GLES3ScopedState
+	{
+		public:
+			enum State
+			{
+				DEPTH_TEST,
+				SCISSOR_TEST,
+				STENCIL_TEST,
+				RASTERIZER_DISCARD,
+				DITHER,
+				CULL_FACE,
+				BLEND,
+
+				NUM_STATES
+			};
+			enum TextureUnit
+			{
+				TEXTURE0,
+
+				NUM_TEXTURE_UNITS
+			};
+		public:
+			GLES3ScopedState(void)
+			{
+				OVR_CAPTURE_CPU_ZONE(SaveState);
+
+				memset(&m_previousViewport, 0, sizeof(m_previousViewport));
+				glGetIntegerv(GL_VIEWPORT, &m_previousViewport.x);
+				m_currentViewport = m_previousViewport;
+
+				m_previousRBO = 0;
+				glGetIntegerv(GL_RENDERBUFFER_BINDING, reinterpret_cast<GLint*>(&m_previousRBO));
+				m_currentRBO = m_previousRBO;
+
+				m_previousFBO = 0;
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING, reinterpret_cast<GLint*>(&m_previousFBO));
+				m_currentFBO = m_previousFBO;
+
+				m_previousPBO = 0;
+				glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, reinterpret_cast<GLint*>(&m_previousPBO));
+				m_currentPBO = m_previousPBO;
+
+				m_previousVAO = 0;
+				glGetIntegerv(GL_VERTEX_ARRAY_BINDING, reinterpret_cast<GLint*>(&m_previousVAO));
+				m_currentVAO = m_previousVAO;
+
+				m_previousProgram = 0;
+				glGetIntegerv(GL_CURRENT_PROGRAM, reinterpret_cast<GLint*>(&m_previousProgram));
+				m_currentProgram = m_previousProgram;
+
+				m_previousActiveTexture = GL_TEXTURE0;
+				glGetIntegerv(GL_ACTIVE_TEXTURE, reinterpret_cast<GLint*>(&m_previousActiveTexture));
+				m_currentActiveTexture = m_previousActiveTexture;
+
+				for(GLuint i=0; i<NUM_TEXTURE_UNITS; i++)
+				{
+					ActiveTexture(GL_TEXTURE0 + i);
+					m_previousBoundTexture[i] = 0;
+					glGetIntegerv(GL_TEXTURE_BINDING_2D, reinterpret_cast<GLint*>(&m_previousBoundTexture[i]));
+					m_currentBoundTexture[i] = m_previousBoundTexture[i];
+				}
+
+				memset(m_previousColorMask, 0, sizeof(m_previousColorMask));
+				glGetBooleanv(GL_COLOR_WRITEMASK, m_previousColorMask);
+				memcpy(m_currentColorMask, m_previousColorMask, sizeof(m_previousColorMask));
+
+				memset(m_stateEnums, 0, sizeof(m_stateEnums));
+				m_stateEnums[DEPTH_TEST]         = GL_DEPTH_TEST;
+				m_stateEnums[SCISSOR_TEST]       = GL_SCISSOR_TEST;
+				m_stateEnums[STENCIL_TEST]       = GL_STENCIL_TEST;
+				m_stateEnums[RASTERIZER_DISCARD] = GL_RASTERIZER_DISCARD;
+				m_stateEnums[DITHER]             = GL_DITHER;
+				m_stateEnums[CULL_FACE]          = GL_CULL_FACE;
+				m_stateEnums[BLEND]              = GL_BLEND;
+				for(GLuint i=0; i<NUM_STATES; i++)
+				{
+					OVR_CAPTURE_ASSERT(m_stateEnums[i] != 0); // make sure the mapping is complete
+					m_previousStates[i] = glIsEnabled(m_stateEnums[i]);
+					m_currentStates[i] = m_previousStates[i];
+				}
+			}
+
+			~GLES3ScopedState(void)
+			{
+				OVR_CAPTURE_CPU_ZONE(RestoreState);
+
+				Viewport(m_previousViewport.x, m_previousViewport.y, m_previousViewport.width, m_previousViewport.height);
+				BindRenderbuffer(m_previousRBO);
+				BindFramebuffer(m_previousFBO);
+				BindPixelBuffer(m_previousPBO);
+				BindVertexArray(m_previousVAO);
+
+				UseProgram(m_previousProgram);
+
+				for(GLuint i=0; i<NUM_TEXTURE_UNITS; i++)
+				{
+					BindTexture((TextureUnit)i, m_previousBoundTexture[i]);
+				}
+				ActiveTexture(m_previousActiveTexture);
+
+				ColorMask(m_previousColorMask[0], m_previousColorMask[1], m_previousColorMask[2], m_previousColorMask[3]);
+
+				for(GLuint i=0; i<NUM_STATES; i++)
+				{
+					SetState((State)i, m_previousStates[i]);
+				}
+			}
+
+			void Viewport(const Rect<GLint> &viewport)
+			{
+				if(m_currentViewport != viewport)
+				{
+					glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+					m_currentViewport = viewport;
+				}
+			}
+
+			void Viewport(GLint x, GLint y, GLsizei width, GLsizei height)
+			{
+				const Rect<GLint> viewport = {x, y, width, height};
+				Viewport(viewport);
+			}
+
+			void BindRenderbuffer(GLuint rbo)
+			{
+				if(m_currentRBO != rbo)
+				{
+					glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+					m_currentRBO = rbo;
+				}
+			}
+
+			void BindFramebuffer(GLuint fbo)
+			{
+				if(m_currentFBO != fbo)
+				{
+					glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+					m_currentFBO = fbo;
+				}
+			}
+
+			void BindPixelBuffer(GLuint pbo)
+			{
+				if(m_currentPBO != pbo)
+				{
+					glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+					m_currentPBO = pbo;
+				}
+			}
+
+			void BindVertexArray(GLuint vao)
+			{
+				if(m_currentVAO != vao)
+				{
+					glBindVertexArray(vao);
+					m_currentVAO = vao;
+				}
+			}
+
+			void UseProgram(GLuint program)
+			{
+				if(m_currentProgram != program)
+				{
+					glUseProgram(program);
+					m_currentProgram = program;
+				}
+			}
+
+			void Enable(State state)
+			{
+				SetState(state, GL_TRUE);
+			}
+
+			void Disable(State state)
+			{
+				SetState(state, GL_FALSE);
+			}
+
+			void SetState(State state, GLboolean value)
+			{
+				OVR_CAPTURE_ASSERT(state >= 0 && state < NUM_STATES);
+				if(m_currentStates[state] != value)
+				{
+					if(value) glEnable( m_stateEnums[state]);
+					else      glDisable(m_stateEnums[state]);
+					m_currentStates[state] = value;
+				}
+			}
+
+			void ColorMask(GLboolean r, GLboolean g, GLboolean b, GLboolean a)
+			{
+				if(m_currentColorMask[0]!=r || m_currentColorMask[1]!=g || m_currentColorMask[2]!=b || m_currentColorMask[3]!=a)
+				{
+					glColorMask(r, g, b, a);
+					m_currentColorMask[0] = r;
+					m_currentColorMask[1] = g;
+					m_currentColorMask[2] = b;
+					m_currentColorMask[3] = a;
+				}
+			}
+
+			void BindTexture(TextureUnit textureUnit, GLuint textureid)
+			{
+				if(m_currentBoundTexture[textureUnit] != textureid)
+				{
+					ActiveTexture(textureUnit + GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, textureid);
+					m_currentBoundTexture[textureUnit] = textureid;
+				}
+			}
+
+		private:
+			void ActiveTexture(GLenum textureUnit)
+			{
+				if(m_currentActiveTexture != textureUnit)
+				{
+					glActiveTexture(textureUnit);
+					m_currentActiveTexture = textureUnit;
+				}
+			}
+		private:
+			Rect<GLint> m_previousViewport;
+			Rect<GLint> m_currentViewport;
+
+			GLuint      m_previousRBO;
+			GLuint      m_currentRBO;
+
+			GLuint      m_previousFBO;
+			GLuint      m_currentFBO;
+
+			GLuint      m_previousPBO;
+			GLuint      m_currentPBO;
+
+			GLuint      m_previousVAO;
+			GLuint      m_currentVAO;
+
+			GLuint      m_previousProgram;
+			GLuint      m_currentProgram;
+
+			GLenum      m_previousActiveTexture;
+			GLenum      m_currentActiveTexture;
+
+			GLuint      m_previousBoundTexture[NUM_TEXTURE_UNITS];
+			GLuint      m_currentBoundTexture[NUM_TEXTURE_UNITS];
+
+			GLboolean   m_previousColorMask[4];
+			GLboolean   m_currentColorMask[4];
+
+			GLenum      m_stateEnums[NUM_STATES];
+			GLboolean   m_previousStates[NUM_STATES];
+			GLboolean   m_currentStates[NUM_STATES];
 	};
 
 	static void InitGLES3(void)
@@ -301,7 +573,7 @@ namespace Capture
 
 	// Captures the frame buffer from a Texture Object from an OpenGL ES 3.0 Context.
 	// Must be called from a thread with a valid GLES3 context!
-	void FrameBufferGLES3(unsigned int textureID)
+	void FrameBufferGLES3(unsigned int textureID, Rect<float> textureRect)
 	{
 		if(!CheckConnectionFlag(Enable_FrameBuffer_Capture))
 		{
@@ -328,6 +600,9 @@ namespace Capture
 		// acquire current time before spending cycles mapping and copying the PBO...
 		const UInt64 currentTime = GetNanoseconds();
 
+		// Scoped Save/Restore GL state...
+		GLES3ScopedState glstate;
+
 		// Acquire a PendingFrameBuffer container...
 		PendingFrameBuffer &fb = g_pendingFramebuffers[g_nextPendingFramebuffer];
 
@@ -336,30 +611,27 @@ namespace Capture
 		{
 			OVR_CAPTURE_CPU_ZONE(MapAndCopy);
 			// 4) Map PBO memory and call FrameBuffer(g_imageFormat,g_imageWidth,g_imageHeight,imageData)
-			glBindBuffer(GL_PIXEL_PACK_BUFFER, fb.pbo);
+			glstate.BindPixelBuffer(fb.pbo);
 			const void *mappedImage = glMapBufferRange(GL_PIXEL_PACK_BUFFER, 0, g_imageSize, GL_MAP_READ_BIT);
 			FrameBuffer(fb.timestamp, g_imageFormat, g_imageWidth, g_imageHeight, mappedImage);
 			glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-			glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 			fb.imageReady = false;
 		}
 
 		// 0) Capture Time Stamp
 		fb.timestamp = currentTime;
 
-
 		// Create GL objects if necessary...
 		if(!fb.renderbuffer)
 		{
 			glGenRenderbuffers(1, &fb.renderbuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, fb.renderbuffer);
+			glstate.BindRenderbuffer(fb.renderbuffer);
 			glRenderbufferStorage(GL_RENDERBUFFER, g_imageFormatGL, g_imageWidthBlocks, g_imageHeightBlocks);
-			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		}
 		if(!fb.fbo)
 		{
 			glGenFramebuffers(1, &fb.fbo);
-			glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+			glstate.BindFramebuffer(fb.fbo);
 			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, fb.renderbuffer);
 			const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
 			if(status != GL_FRAMEBUFFER_COMPLETE)
@@ -367,14 +639,12 @@ namespace Capture
 				Logf(Log_Error, "OVR::Capture::FrameBufferGLES3(): Failed to create valid FBO!");
 				fb.fbo = 0;
 			}
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		}
 		if(!fb.pbo)
 		{
 			glGenBuffers(1, &fb.pbo);
-			glBindBuffer(GL_PIXEL_PACK_BUFFER, fb.pbo);
+			glstate.BindPixelBuffer(fb.pbo);
 			glBufferData(GL_PIXEL_PACK_BUFFER, g_imageSize, NULL, GL_DYNAMIC_READ);
-			glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
 		}
 
 		// Create shader if necessary...
@@ -428,11 +698,14 @@ namespace Capture
 			}
 			else
 			{
-				glUseProgram(g_program);
+				glstate.UseProgram(g_program);
 				glUniform1i(glGetUniformLocation(g_program, "Texture0"), 0);
 				if(g_imageFormat == FrameBuffer_DXT1)
+				{
 					glUniform2f(glGetUniformLocation(g_program, "TexelSize"), 1.0f/(float)g_imageWidth, 1.0f/(float)g_imageHeight);
-				glUseProgram(0);
+					glUniform2f(glGetUniformLocation(g_program, "UVBlockScale"), (g_imageWidth-3)/(float)g_imageWidth, (g_imageHeight-3)/(float)g_imageHeight);
+				}
+				g_textureRectLoc = glGetUniformLocation(g_program, "TextureRect");
 			}
 		}
 
@@ -440,7 +713,7 @@ namespace Capture
 		if(!g_vertexArrayObject)
 		{
 			glGenVertexArrays(1, &g_vertexArrayObject);
-			glBindVertexArray(g_vertexArrayObject);
+			glstate.BindVertexArray(g_vertexArrayObject);
 
 			glGenBuffers(1, &g_vertexBuffer);
 			glBindBuffer(GL_ARRAY_BUFFER, g_vertexBuffer);
@@ -457,53 +730,41 @@ namespace Capture
 			return;
 
 		// 1) StretchBlit into lower resolution 565 texture
-		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+
+		// Override OpenGL State...
+		if(true)
+		{
+			OVR_CAPTURE_CPU_ZONE(BindState);
+
+			glstate.BindFramebuffer(fb.fbo);
+
+			glstate.Viewport(0, 0, g_imageWidthBlocks, g_imageHeightBlocks);
+
+			glstate.Disable(glstate.DEPTH_TEST);
+			glstate.Disable(glstate.SCISSOR_TEST);
+			glstate.Disable(glstate.STENCIL_TEST);
+			glstate.Disable(glstate.RASTERIZER_DISCARD);
+			glstate.Disable(glstate.DITHER);
+			glstate.Disable(glstate.CULL_FACE); // turning culling off entirely is one less state than setting winding order and front face.
+			glstate.Disable(glstate.BLEND);
+
+			glstate.ColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+
+			glstate.BindTexture(glstate.TEXTURE0, textureID);
+			glstate.UseProgram(g_program);
+
+			// TextureRect...
+			if(g_textureRectLoc != -1)
+			{
+				glUniform4f(g_textureRectLoc, textureRect.x, textureRect.y, textureRect.width, textureRect.height);
+			}
+
+			glstate.BindVertexArray(g_vertexArrayObject);
+		}
+
 		const GLenum attachments[1] = { GL_COLOR_ATTACHMENT0 };
 		glInvalidateFramebuffer(GL_FRAMEBUFFER, 1, attachments);
 
-		glViewport(0, 0, g_imageWidthBlocks, g_imageHeightBlocks);
-
-		// These are the GLenum states that we want disabled for our blit...
-		static const GLenum disabledState[] =
-		{
-			GL_DEPTH_TEST,
-			GL_SCISSOR_TEST,
-			GL_STENCIL_TEST,
-			GL_RASTERIZER_DISCARD,
-			GL_DITHER,
-			GL_CULL_FACE, // turning culling off entirely is one less state than setting winding order and front face.
-			GL_BLEND,
-		};
-		static const GLuint disabledStateCount = sizeof(disabledState) / sizeof(disabledState[0]);
-
-		GLboolean disabledStatePreviousValue[disabledStateCount] = {0};
-		GLboolean previousColorMask[4]                           = {0};
-
-		if(true)
-		{
-			OVR_CAPTURE_CPU_ZONE(LoadState);
-			// Load previous state and disable only if necessary...
-			for(GLuint i=0; i<disabledStateCount; i++)
-			{
-				disabledStatePreviousValue[i] = glIsEnabled(disabledState[i]);
-			}
-			// Save/override color write mask state...
-			glGetBooleanv(GL_COLOR_WRITEMASK, previousColorMask);
-		}
-		if(true)
-		{
-			OVR_CAPTURE_CPU_ZONE(OverrideState);
-			for(GLuint i=0; i<disabledStateCount; i++)
-			{
-				if(disabledStatePreviousValue[i])
-					glDisable(disabledState[i]);
-			}
-			if(previousColorMask[0]!=GL_TRUE || previousColorMask[1]!=GL_TRUE || previousColorMask[2]!=GL_TRUE)
-			{
-				glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_FALSE);
-			}
-		}
-		
 		// Useful for detecting GL state leaks that kill drawing...
 		// Because only a few state bits affect glClear (pixel ownership, dithering, color mask, and scissor), enabling this
 		// helps narrow down if a the FB is not being updated because of further state leaks that affect rendering geometry,
@@ -511,48 +772,28 @@ namespace Capture
 		//glClearColor(0,0,1,1);
 		//glClear(GL_COLOR_BUFFER_BIT);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glUseProgram(g_program);
-
-		glBindVertexArray(g_vertexArrayObject);
-
+		// Blit draw call...
 		if(true)
 		{
 			OVR_CAPTURE_CPU_AND_GPU_ZONE(DrawArrays);
 			glDrawArrays(GL_TRIANGLES, 0, 3);
 		}
 
-		glUseProgram(0);
-
 		// 2) Issue async ReadPixels into pixel buffer object
-		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER, fb.pbo);
-		if(g_imageFormatGL == GL_RGB565)
-			glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGB,          GL_UNSIGNED_SHORT_5_6_5, 0);
-		else if(g_imageFormatGL == GL_RGBA8)
-			glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA,         GL_UNSIGNED_BYTE,        0);
-		else if(g_imageFormatGL == GL_RGBA16UI)
-			glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT,       0);
-		else if(g_imageFormatGL == GL_RGBA16I)
-			glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA_INTEGER, GL_SHORT,                0);
-		glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		fb.imageReady = true;
-
 		if(true)
 		{
-			OVR_CAPTURE_CPU_ZONE(RestoreState);
-			// Restore previous state...
-			for(GLuint i=0; i<disabledStateCount; i++)
-			{
-				if(disabledStatePreviousValue[i])
-					glEnable(disabledState[i]);
-			}
-			if(previousColorMask[0]!=GL_TRUE || previousColorMask[1]!=GL_TRUE || previousColorMask[2]!=GL_TRUE)
-			{
-				glColorMask(previousColorMask[0], previousColorMask[1], previousColorMask[2], previousColorMask[3]);
-			}
+			OVR_CAPTURE_CPU_ZONE(ReadPixels);
+			glstate.BindFramebuffer(fb.fbo);
+			glstate.BindPixelBuffer(fb.pbo);
+			if(g_imageFormatGL == GL_RGB565)
+				glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGB,          GL_UNSIGNED_SHORT_5_6_5, 0);
+			else if(g_imageFormatGL == GL_RGBA8)
+				glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA,         GL_UNSIGNED_BYTE,        0);
+			else if(g_imageFormatGL == GL_RGBA16UI)
+				glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA_INTEGER, GL_UNSIGNED_SHORT,       0);
+			else if(g_imageFormatGL == GL_RGBA16I)
+				glReadPixels(0, 0, g_imageWidthBlocks, g_imageHeightBlocks, GL_RGBA_INTEGER, GL_SHORT,                0);
+			fb.imageReady = true;
 		}
 
 		// Increment to the next PendingFrameBuffer...

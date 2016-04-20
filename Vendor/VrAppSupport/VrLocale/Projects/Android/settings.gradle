@@ -1,4 +1,4 @@
 rootProject.projectDir = new File(settingsDir, '../../../..')
 rootProject.name = "VrLocale"
 
-include ':', ':Vendor:VrAppSupport:VrLocale:Projects:Android'
+include ':', ':VrAppSupport:VrLocale:Projects:Android'

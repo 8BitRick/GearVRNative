@@ -56,6 +56,9 @@ extern "C" {
 
 #define HOME_PACKAGE_NAME			"com.oculus.home"
 
+// action string sent to Oculus Home to tell it to return to the root menu
+#define HOME_ACTION_RETURN_TO_ROOT	"return_to_root"
+
 // Start up the platform UI for pass-through camera, reorient, exit, etc.
 // The current app will be covered up by the platform UI, but will be
 // returned to when it finishes.
@@ -205,7 +208,10 @@ void SystemActivities_SendIntent( const ovrJava * java, const char * actionName,
 // from the interface, but that would require duplication of the Java code in both places because
 // this is also used internally in SystemActivities_ReturnToHome.
 // Sends a launch intent to the specified package.
-void SystemActivities_SendLaunchIntent( const ovrJava * java, const char * toPackageName, const char * command, const char * uri );
+// Then the destination package will be queried for its launch intent. If action is not NULL, then
+// the intent's action will be set to the string pointed to by action.
+void SystemActivities_SendLaunchIntent( const ovrJava * java, const char * toPackageName, 
+		const char * command, const char * uri, const char * action );
 
 #if defined( __cplusplus )
 } // extern "C"

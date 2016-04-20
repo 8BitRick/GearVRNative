@@ -53,8 +53,13 @@ namespace Capture
 
 		Packet_Log,
 		
-		Packet_Var_Range,
-		Packet_Var_Set,
+		Packet_FloatParam_Range,
+		Packet_FloatParam_Set,
+
+		Packet_IntParam_Range,
+		Packet_IntParam_Set,
+
+		Packet_BoolParam_Set,
 	};
 
 	struct ZeroConfigPacket
@@ -302,9 +307,9 @@ namespace Capture
 	typedef LogPacket_<> LogPacket; // Current Version
 
 	template<UInt32 packet_version=1>
-	struct VarRangePacket_
+	struct FloatParamRangePacket_
 	{
-		static const PacketIdentifier s_packetID   = Packet_Var_Range;
+		static const PacketIdentifier s_packetID   = Packet_FloatParam_Range;
 		static const UInt32           s_version    = packet_version;
 		static const bool             s_hasPayload = false;
 
@@ -313,21 +318,62 @@ namespace Capture
 		float  valMin;
 		float  valMax;
 	};
-	OVR_CAPTURE_STATIC_ASSERT(sizeof(VarRangePacket_<>)==4+4+4+4);
-	typedef VarRangePacket_<> VarRangePacket; // Current Version
+	OVR_CAPTURE_STATIC_ASSERT(sizeof(FloatParamRangePacket_<>)==4+4+4+4);
+	typedef FloatParamRangePacket_<> FloatParamRangePacket; // Current Version
 
 	template<UInt32 packet_version=1>
-	struct VarSetPacket_
+	struct FloatParamPacket_
 	{
-		static const PacketIdentifier s_packetID   = Packet_Var_Set;
+		static const PacketIdentifier s_packetID   = Packet_FloatParam_Set;
 		static const UInt32           s_version    = packet_version;
 		static const bool             s_hasPayload = false;
 
 		UInt32 labelID;
 		float  value;
 	};
-	OVR_CAPTURE_STATIC_ASSERT(sizeof(VarSetPacket_<>)==4+4);
-	typedef VarSetPacket_<> VarSetPacket; // Current Version
+	OVR_CAPTURE_STATIC_ASSERT(sizeof(FloatParamPacket_<>)==4+4);
+	typedef FloatParamPacket_<> FloatParamPacket; // Current Version
+
+	template<UInt32 packet_version=1>
+	struct IntParamRangePacket_
+	{
+		static const PacketIdentifier s_packetID   = Packet_IntParam_Range;
+		static const UInt32           s_version    = packet_version;
+		static const bool             s_hasPayload = false;
+
+		UInt32 labelID;
+		Int32  value;
+		Int32  valMin;
+		Int32  valMax;
+	};
+	OVR_CAPTURE_STATIC_ASSERT(sizeof(IntParamRangePacket_<>)==4+4+4+4);
+	typedef IntParamRangePacket_<> IntParamRangePacket; // Current Version
+
+	template<UInt32 packet_version=1>
+	struct IntParamPacket_
+	{
+		static const PacketIdentifier s_packetID   = Packet_IntParam_Set;
+		static const UInt32           s_version    = packet_version;
+		static const bool             s_hasPayload = false;
+
+		UInt32 labelID;
+		Int32  value;
+	};
+	OVR_CAPTURE_STATIC_ASSERT(sizeof(IntParamPacket_<>)==4+4);
+	typedef IntParamPacket_<> IntParamPacket; // Current Version
+
+	template<UInt32 packet_version=1>
+	struct BoolParamPacket_
+	{
+		static const PacketIdentifier s_packetID   = Packet_BoolParam_Set;
+		static const UInt32           s_version    = packet_version;
+		static const bool             s_hasPayload = false;
+
+		UInt32 labelID;
+		UInt32 value;
+	};
+	OVR_CAPTURE_STATIC_ASSERT(sizeof(BoolParamPacket_<>)==4+4);
+	typedef BoolParamPacket_<> BoolParamPacket; // Current Version
 
 
 	// restore default alignment...

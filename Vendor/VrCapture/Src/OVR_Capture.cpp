@@ -12,7 +12,6 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 
 #include <OVR_Capture.h>
 #include "OVR_Capture_Local.h"
-#include "OVR_Capture_Variable.h"
 #include "OVR_Capture_Socket.h"
 #include "OVR_Capture_AsyncStream.h"
 #include "OVR_Capture_StandardSensors.h"
@@ -49,6 +48,7 @@ Copyright   :   Copyright 2015 Oculus VR, LLC. All Rights reserved.
 
 #include <memory.h>
 #include <new>
+#include <unordered_map>
 
 #include <stdio.h>
 
@@ -77,7 +77,38 @@ namespace Capture
 	static OnConnectFunc        g_onConnect       = NULL;
 	static OnDisconnectFunc     g_onDisconnect    = NULL;
 
-	static VarStore				g_varStore;
+	template<typename T>
+	class ParameterState
+	{
+		public:
+			ParameterState(void)
+			{
+				currentValue = defaultValue = minValue = maxValue = static_cast<T>(0);
+				useCurrent = false;
+			}
+
+		public:
+			T    currentValue;
+			T    defaultValue;
+			T    minValue;
+			T    maxValue;
+			bool useCurrent;
+	};
+
+	typedef ParameterState<float> FloatParam;
+	typedef std::unordered_map<UInt32,FloatParam> FloatParamMap;
+
+	typedef ParameterState<int> IntParam;
+	typedef std::unordered_map<UInt32,IntParam> IntParamMap;
+
+	typedef ParameterState<bool> BoolParam;
+	typedef std::unordered_map<UInt32,BoolParam> BoolParamMap;
+
+	static RWLock        g_paramLock;
+	static FloatParamMap g_floatParams;
+	static IntParamMap   g_intParams;
+	static BoolParamMap  g_boolParams;
+	
 
 	/***********************************
 	 * Helper Functions                 *
@@ -156,9 +187,18 @@ namespace Capture
 			LabelPacket packet;
 			packet.labelID = label.GetIdentifier();
 			const char *name = label.GetName();
-			AsyncStream::Acquire()->WritePacket(packet, name, (UInt32)strlen(name));
+			AsyncStream::Acquire()->WritePacket(packet, name, static_cast<LabelPacket::PayloadSizeType>( strlen(name) ));
 			UnlockConnection();
 		}
+	}
+
+	static void ClearParameters(void)
+	{
+		g_paramLock.WriteLock();
+		g_floatParams.clear();
+		g_intParams.clear();
+		g_boolParams.clear();
+		g_paramLock.WriteUnlock();
 	}
 
 	static UInt32 StringHash32(const char *str)
@@ -234,7 +274,11 @@ namespace Capture
 		BuildPacketDescriptorPacket<SensorPacket>(),
 		BuildPacketDescriptorPacket<FrameBufferPacket>(),
 		BuildPacketDescriptorPacket<LogPacket>(),
-		BuildPacketDescriptorPacket<VarRangePacket>(),
+		BuildPacketDescriptorPacket<FloatParamRangePacket>(),
+		BuildPacketDescriptorPacket<FloatParamPacket>(),
+		BuildPacketDescriptorPacket<IntParamRangePacket>(),
+		BuildPacketDescriptorPacket<IntParamPacket>(),
+		BuildPacketDescriptorPacket<BoolParamPacket>(),
 	};
 	static const UInt32 g_numPacketDescs = sizeof(g_packetDescs) / sizeof(g_packetDescs[0]);
 
@@ -445,12 +489,45 @@ namespace Capture
 						if(waitflags & Socket::WaitFlag_Read)
 						{
 							PacketHeader header;
-							VarSetPacket packet;
 							m_streamSocket->Receive((char*)&header, sizeof(header));
-							if (header.packetID == Packet_Var_Set)
+							if (header.packetID == FloatParamPacket::s_packetID)
 							{
+								FloatParamPacket packet;
 								m_streamSocket->Receive((char*)&packet, sizeof(packet));
-								g_varStore.Set(packet.labelID, packet.value, true);
+								g_paramLock.WriteLock();
+								FloatParamMap::iterator found = g_floatParams.find(packet.labelID);
+								if(found != g_floatParams.end())
+								{
+									(*found).second.currentValue = packet.value;
+									(*found).second.useCurrent   = true;
+								}
+								g_paramLock.WriteUnlock();
+							}
+							else if (header.packetID == IntParamPacket::s_packetID)
+							{
+								IntParamPacket packet;
+								m_streamSocket->Receive((char*)&packet, sizeof(packet));
+								g_paramLock.WriteLock();
+								IntParamMap::iterator found = g_intParams.find(packet.labelID);
+								if(found != g_intParams.end())
+								{
+									(*found).second.currentValue = packet.value;
+									(*found).second.useCurrent   = true;
+								}
+								g_paramLock.WriteUnlock();
+							}
+							else if (header.packetID == BoolParamPacket::s_packetID)
+							{
+								BoolParamPacket packet;
+								m_streamSocket->Receive((char*)&packet, sizeof(packet));
+								g_paramLock.WriteLock();
+								BoolParamMap::iterator found = g_boolParams.find(packet.labelID);
+								if(found != g_boolParams.end())
+								{
+									(*found).second.currentValue = packet.value ? true : false;
+									(*found).second.useCurrent   = true;
+								}
+								g_paramLock.WriteUnlock();
 							}
 							else
 							{
@@ -508,7 +585,8 @@ namespace Capture
 					// write out to a stream.
 					AsyncStream::Shutdown();
 
-					g_varStore.Clear();
+					// Clear remote parameter store...
+					ClearParameters();
 				} // while(m_listenSocket && !QuitSignaled())
 			}
 
@@ -597,7 +675,8 @@ namespace Capture
 				// write out to a stream.
 				AsyncStream::Shutdown();
 
-				g_varStore.Clear();
+				// Clear remote parameter store...
+				ClearParameters();
 
 				if(m_file != NullFileHandle)
 				{
@@ -886,7 +965,7 @@ namespace Capture
 			LogPacket packet;
 			packet.timestamp = GetNanoseconds();
 			packet.priority  = priority;
-			AsyncStream::Acquire()->WritePacket(packet, str, (UInt32)strlen(str));
+			AsyncStream::Acquire()->WritePacket(packet, str, static_cast<LogPacket::PayloadSizeType>( strlen(str)) );
 			UnlockConnection();
 		}
 	}
@@ -946,56 +1025,163 @@ namespace Capture
 		}
 	}
 
-	float GetVariable(const LabelIdentifier label, float valDefault, float valMin, float valMax)
+	// Get a user controllable variable... removely tweaked in real-time via OVRMonitor.
+	float GetVariable(const LabelIdentifier label, float defaultValue, float minValue, float maxValue)
 	{
-		// if this is defined, we allow the device to overwrite variables that haven't
-		// been modified by the client
-	#ifdef VAR_OVERWRITE
-		float valCur = valDefault;
-	#endif
-		if (TryLockConnection())
+		// If not connected, just pass through the default value...
+		float returnValue = defaultValue;
+
+		if(TryLockConnection())
 		{
-			const UInt32 hash = label.GetIdentifier();
-		#ifdef VAR_OVERWRITE
-			UInt32 valueType = g_varStore.Get(hash, valCur);
-			// if we have gotten a reply from the client, no longer update with
-			// a default 
-			if (valueType != VarStore::ClientValue)
+			const UInt32 labelid = label.GetIdentifier();
+
+			// Check to see if this parameter already exists, if so just return the current value...
+			g_paramLock.ReadLock();
+			FloatParamMap::iterator found = g_floatParams.find(labelid);
+			if(found != g_floatParams.end())
 			{
-				// if we have already sent this value, don't send it again
-				if (valueType == VarStore::DeviceValue && valCur == valDefault)
+				const FloatParam oldParam = (*found).second;
+				// update return value from cached parameter...
+				if(oldParam.useCurrent)
 				{
-					UnlockConnection();
-					return valDefault;
+					returnValue = oldParam.currentValue;
 				}
-				g_varStore.Set(hash, valDefault);
-				VarRangePacket packet;
-				packet.labelID = hash; 
-				packet.value = valDefault;
-				packet.valMin = valMin;
-				packet.valMax = valMax;
-				AsyncStream::Acquire()->WritePacket(packet);
-			}  
-		#else
-			if (g_varStore.Get(hash, valDefault) == VarStore::NoValue)
-			{
-				g_varStore.Set(hash, valDefault);
-				VarRangePacket packet;
-				packet.labelID = hash; 
-				packet.value = valDefault;
-				packet.valMin = valMin;
-				packet.valMax = valMax;
-				AsyncStream::Acquire()->WritePacket(packet);
+				// if the parameter range hasn't changed, just return the current value... else we need to update the param.
+				if(oldParam.defaultValue == defaultValue && oldParam.minValue == minValue && oldParam.maxValue == maxValue)
+				{
+					g_paramLock.ReadUnlock();
+					UnlockConnection();
+					return returnValue;
+				}
 			}
-		#endif
+			g_paramLock.ReadUnlock();
+
+			// New parameter... add it to the param map...
+			g_paramLock.WriteLock();
+			FloatParam &newParam  = g_floatParams[labelid];
+			newParam.defaultValue = defaultValue;
+			newParam.minValue     = minValue;
+			newParam.maxValue     = maxValue;
+			g_paramLock.WriteUnlock();
+
+			// Report new parameter to remote monitor...
+			FloatParamRangePacket packet;
+			packet.labelID = labelid; 
+			packet.value   = defaultValue;
+			packet.valMin  = minValue;
+			packet.valMax  = maxValue;
+			AsyncStream::Acquire()->WritePacket(packet);
+
 			UnlockConnection();
 		}
-	#ifdef VAR_OVERWRITE
-		return valCur;
-	#else
-		return valDefault;
-	#endif
-	}  
+
+		// This is a new variable, so just return the default...
+		return returnValue;
+	}
+
+	// Get a user controllable variable... removely tweaked in real-time via OVRMonitor.
+	int GetVariable(const LabelIdentifier label, int defaultValue, int minValue, int maxValue)
+	{
+		// If not connected, just pass through the default value...
+		int returnValue = defaultValue;
+
+		if(TryLockConnection())
+		{
+			const UInt32 labelid = label.GetIdentifier();
+
+			// Check to see if this parameter already exists, if so just return the current value...
+			g_paramLock.ReadLock();
+			IntParamMap::iterator found = g_intParams.find(labelid);
+			if(found != g_intParams.end())
+			{
+				const IntParam oldParam = (*found).second;
+				// update return value from cached parameter...
+				if(oldParam.useCurrent)
+				{
+					returnValue = oldParam.currentValue;
+				}
+				// if the parameter range hasn't changed, just return the current value... else we need to update the param.
+				if(oldParam.defaultValue == defaultValue && oldParam.minValue == minValue && oldParam.maxValue == maxValue)
+				{
+					g_paramLock.ReadUnlock();
+					UnlockConnection();
+					return returnValue;
+				}
+			}
+			g_paramLock.ReadUnlock();
+
+			// New parameter... add it to the param map...
+			g_paramLock.WriteLock();
+			IntParam &newParam    = g_intParams[labelid];
+			newParam.defaultValue = defaultValue;
+			newParam.minValue     = minValue;
+			newParam.maxValue     = maxValue;
+			g_paramLock.WriteUnlock();
+
+			// Report new parameter to remote monitor...
+			IntParamRangePacket packet;
+			packet.labelID = labelid; 
+			packet.value   = defaultValue;
+			packet.valMin  = minValue;
+			packet.valMax  = maxValue;
+			AsyncStream::Acquire()->WritePacket(packet);
+
+			UnlockConnection();
+		}
+
+		// This is a new variable, so just return the default...
+		return returnValue;
+	}
+
+	// Get a user controllable variable... removely tweaked in real-time via OVRMonitor.
+	bool GetVariable(const LabelIdentifier label, bool defaultValue)
+	{
+		// If not connected, just pass through the default value...
+		bool returnValue = defaultValue;
+
+		if(TryLockConnection())
+		{
+			const UInt32 labelid = label.GetIdentifier();
+
+			// Check to see if this parameter already exists, if so just return the current value...
+			g_paramLock.ReadLock();
+			BoolParamMap::iterator found = g_boolParams.find(labelid);
+			if(found != g_boolParams.end())
+			{
+				const BoolParam oldParam = (*found).second;
+				// update return value from cached parameter...
+				if(oldParam.useCurrent)
+				{
+					returnValue = oldParam.currentValue;
+				}
+				// if the parameter range hasn't changed, just return the current value... else we need to update the param.
+				if(oldParam.defaultValue == defaultValue)
+				{
+					g_paramLock.ReadUnlock();
+					UnlockConnection();
+					return returnValue;
+				}
+			}
+			g_paramLock.ReadUnlock();
+
+			// New parameter... add it to the param map...
+			g_paramLock.WriteLock();
+			BoolParam &newParam   = g_boolParams[labelid];
+			newParam.defaultValue = defaultValue;
+			g_paramLock.WriteUnlock();
+
+			// Report new parameter to remote monitor...
+			BoolParamPacket packet;
+			packet.labelID = labelid; 
+			packet.value   = defaultValue ? 1 : 0;
+			AsyncStream::Acquire()->WritePacket(packet);
+
+			UnlockConnection();
+		}
+
+		// This is a new variable, so just return the default...
+		return returnValue;
+	}
 
 
 	/***********************************

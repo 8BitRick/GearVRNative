@@ -252,7 +252,7 @@ namespace Capture
 	#endif
 		if(name[0])
 		{
-			WritePacket(packet, name, (UInt32)strlen(name));
+			WritePacket(packet, name, static_cast<ThreadNamePacket::PayloadSizeType>( strlen(name) ));
 		}
 	}
 

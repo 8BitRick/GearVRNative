@@ -32,7 +32,7 @@ namespace Capture
 		return htons(x);
 	#elif BYTE_ORDER == LITTLE_ENDIAN
 		// safe/portable but potentially slower solution to work around NDK's broken inline assembly.
-		return ((x&0x00ff)<<8) | ((x&0xff00)>>8);
+		return static_cast<UInt16>((x&0x00ff)<<8) | static_cast<UInt16>((x&0xff00)>>8);
 	#elif BYTE_ORDER == BIG_ENDIAN
 		return x;
 	#else
